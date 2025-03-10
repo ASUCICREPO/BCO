@@ -40,9 +40,13 @@ sudo npm install -g aws-cdk
 ## 🔧 Step 2: Setup Instructions
 
 1. **📂 Clone the Forked Repository**
-   ```bash
-   git clone <your-forked-repo-link>
-
+```bash
+git clone <your-forked-repo-link>
+```
+### If you intend to change the name of your forked repo, please change the name in the cdk file as well
+   - Navigate to root_folder/CDK/lib/cdk-stack.ts
+   - Go to line 33
+   - Replace 'BCO' with your new repository name.
 
 
 2. **📁 Navigate to the CDK Folder**
