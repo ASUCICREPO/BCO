@@ -10,6 +10,7 @@ import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigatewayv2integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as crypto from 'crypto';
 
 interface CdkstackProps extends cdk.StackProps {
   githubToken: string;
@@ -70,12 +71,7 @@ export class CdkStack extends cdk.Stack {
 
     amplifyApp.addBranch('main');
     
-    const log_bucket = new s3.Bucket(this, 'BCOBucket', {
-      bucketName: 'bco-bedrock-logging',  // Customize this to be unique
-      versioned: false,  // Enable versioning
-      removalPolicy: cdk.RemovalPolicy.DESTROY,  // Automatically delete the bucket when the stack is deleted
-      autoDeleteObjects: true  // Automatically delete all objects in the bucket when it's destroyed
-    });
+    const log_bucket = new s3.Bucket(this, 'BCOBucket');
 
     const table = new dynamodb.Table(this, 'BCO_Users', {
       partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING }
@@ -180,9 +176,11 @@ export class CdkStack extends cdk.Stack {
       },
     });
 
+    const uniqueNumGenerator = crypto.randomBytes(6).toString('hex');
+
     const UserPoolDomain = userPool.addDomain('UserPoolDomain', {
       cognitoDomain: {
-        domainPrefix: 'bco-user-pool'
+        domainPrefix: `bco-user-pool-${uniqueNumGenerator}`
       }
     });
 
@@ -265,6 +263,10 @@ export class CdkStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolDomain', {
+      value: UserPoolDomain.domainName,
     });
 
     new cdk.CfnOutput(this, 'cognitoDomain', {
